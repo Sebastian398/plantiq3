@@ -10,7 +10,7 @@ import 'package:plantiq/widgets/theme_provider.dart';
 class SimpleHoverButton extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const SimpleHoverButton({required this.onTap, required this.child});
+  const SimpleHoverButton({super.key, required this.onTap, required this.child});
 
   @override
   _SimpleHoverButtonState createState() => _SimpleHoverButtonState();
@@ -41,7 +41,7 @@ class _SimpleHoverButtonState extends State<SimpleHoverButton> {
 class SimpleHoverLink extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const SimpleHoverLink({required this.onTap, required this.child});
+  const SimpleHoverLink({super.key, required this.onTap, required this.child});
 
   @override
   _SimpleHoverLinkState createState() => _SimpleHoverLinkState();
@@ -102,7 +102,7 @@ class PaginaInicio extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colors.background, // fondo dinámico
+      backgroundColor: colors.surface, // fondo dinámico
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -125,7 +125,7 @@ class PaginaInicio extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: colors.onBackground, // texto dinámico
+                        color: colors.onSurface, // texto dinámico
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -134,7 +134,7 @@ class PaginaInicio extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: colors.onBackground, // texto dinámico
+                        color: colors.onSurface, // texto dinámico
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -169,7 +169,7 @@ class PaginaInicio extends StatelessWidget {
                     RichText(
                       text: TextSpan(
                         style: TextStyle(
-                          color: colors.onBackground,
+                          color: colors.onSurface,
                           fontSize: 16,
                         ),
                         children: [

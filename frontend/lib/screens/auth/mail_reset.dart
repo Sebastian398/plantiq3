@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // Para jsonEncode
+
 import 'register_screen.dart';
-import 'package:plantiq/main.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../auth/login_screen.dart';
-
 import 'package:plantiq/widgets/theme_logo.dart';
+import 'package:plantiq/main.dart';
 
-// Widget para botón con hover simple (baja opacidad)
 class SimpleHoverButton extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const SimpleHoverButton({required this.onTap, required this.child, Key? key})
-    : super(key: key);
-
+  const SimpleHoverButton({
+    required this.onTap,
+    required this.child,
+    super.key,
+  });
   @override
   _SimpleHoverButtonState createState() => _SimpleHoverButtonState();
 }
 
 class _SimpleHoverButtonState extends State<SimpleHoverButton> {
   bool _isHovered = false;
-
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -38,20 +40,16 @@ class _SimpleHoverButtonState extends State<SimpleHoverButton> {
   }
 }
 
-// Widget para enlace con hover simple (baja opacidad)
 class SimpleHoverLink extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const SimpleHoverLink({required this.onTap, required this.child, Key? key})
-    : super(key: key);
-
+  const SimpleHoverLink({required this.onTap, required this.child, super.key});
   @override
   _SimpleHoverLinkState createState() => _SimpleHoverLinkState();
 }
 
 class _SimpleHoverLinkState extends State<SimpleHoverLink> {
   bool _isHovered = false;
-
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -72,7 +70,6 @@ class _SimpleHoverLinkState extends State<SimpleHoverLink> {
 
 class MailResetScreen extends StatefulWidget {
   const MailResetScreen({super.key});
-
   @override
   State<MailResetScreen> createState() => _MailResetScreen();
 }
@@ -81,12 +78,52 @@ class _MailResetScreen extends State<MailResetScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+  bool _isLoading = false;
+
+  Future<bool> sendResetEmail(String email) async {
+    final url = Uri.parse('http://localhost:8000/api/password_reset/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
       );
+      if (response.statusCode == 200) {
+        // Opcional: parsear respuesta si backend envía confirmación
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      bool success = await sendResetEmail(_emailController.text.trim());
+      setState(() {
+        _isLoading = false;
+      });
+      if (success) {
+        // Navegar a Dashboard solo si éxito
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+      } else {
+        // Mostrar error al usuario
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error enviando correo, intenta de nuevo'),
+          ),
+        );
+      }
     }
   }
 
@@ -94,7 +131,7 @@ class _MailResetScreen extends State<MailResetScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -133,12 +170,11 @@ class _MailResetScreen extends State<MailResetScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          //email
                           TextFormField(
                             controller: _emailController,
-                            style: const TextStyle(color: Color(0xFFE3E3E3)),
+                            style: TextStyle(color: colors.tertiary),
                             decoration: InputDecoration(
-                              labelText: 'Correo electronico',
+                              labelText: 'Correo electrónico',
                               prefixIcon: const Icon(Icons.email),
                             ),
                             validator: (value) {
@@ -152,39 +188,44 @@ class _MailResetScreen extends State<MailResetScreen> {
                             },
                           ),
                           const SizedBox(height: 30),
-                          //botón
                           Center(
-                            child: SimpleHoverButton(
-                              onTap: _submitForm,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 35,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [colors.primary, colors.secondary],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
+                            child: _isLoading
+                                ? const CircularProgressIndicator()
+                                : SimpleHoverButton(
+                                    onTap: _submitForm,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 35,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            colors.primary,
+                                            colors.secondary,
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        'Enviar Correo',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
+                                    ),
                                   ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  'Enviar Correo',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
-                            ),
                           ),
                           const SizedBox(height: 20),
-                          //enlace
                           Center(
                             child: RichText(
                               text: TextSpan(
                                 style: Theme.of(context).textTheme.bodyLarge,
                                 children: [
                                   const TextSpan(
-                                    text: 'Si no te has inscrito registrate ',
+                                    text: 'Si no te has inscrito regístrate ',
                                   ),
                                   WidgetSpan(
                                     child: SimpleHoverLink(

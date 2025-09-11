@@ -90,7 +90,7 @@ class ProfileTab extends StatelessWidget {
                           Center(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: colors.background,
+                                color: colors.surface,
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               child: ClipRRect(
@@ -132,22 +132,22 @@ class ProfileTab extends StatelessWidget {
                       // Avatar
                       CircleAvatar(
                         radius: 120,
-                        backgroundColor: colors.background,
-                        backgroundImage: AssetImage('assets/icon/app_logo.png'),
+                        backgroundColor: colors.surface,
+                        backgroundImage: AssetImage('assets/icon/profile.png'),
                       ),
                       SizedBox(height: 70),
                       Text('Nombres', style: Theme.of(context).textTheme.bodyLarge),
-                      Text('Daniel Samir', style: Theme.of(context).textTheme.bodyMedium),
+                      Text('Neider', style: Theme.of(context).textTheme.bodyMedium),
                       SizedBox(height: 10),
                       Text('Apellidos', style: Theme.of(context).textTheme.bodyLarge),
-                      Text('Gonzáles Pérez', style: Theme.of(context).textTheme.bodyMedium),
+                      Text('Ramirez', style: Theme.of(context).textTheme.bodyMedium),
                       SizedBox(height: 10),
                       Text('Teléfono de contacto', style: Theme.of(context).textTheme.bodyLarge),
-                      Text('0180004455', style: Theme.of(context).textTheme.bodyMedium),
+                      Text('3115331270', style: Theme.of(context).textTheme.bodyMedium),
                       SizedBox(height: 10),
                       Text('Correo Electrónico', style: Theme.of(context).textTheme.bodyLarge),
                       Text(
-                        'GonzalesPerezSamir@gmail.com',
+                        'neider.ramirezdelgadillo@gmail.com',
                         style: Theme.of(context).textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),

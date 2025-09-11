@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:plantiq/services/api_service.dart';
-import 'package:plantiq/models/cultivo.dart'; // 👈 para manejar el modelo
 
 class SystemTap extends StatefulWidget {
+  const SystemTap({super.key});
+
   @override
   _SystemTapState createState() => _SystemTapState();
 }
@@ -82,7 +83,7 @@ class _SystemTapState extends State<SystemTap> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -157,7 +158,7 @@ class _SystemTapState extends State<SystemTap> {
                                   labelText: "Número de lotes",
                                   prefixIcon: Icon(Icons.numbers),
                                 ),
-                                dropdownColor: colors.background,
+                                dropdownColor: colors.surface,
                                 style: TextStyle(color: colors.tertiary),
                                 items: List.generate(10, (index) => index + 1)
                                     .map(
@@ -179,7 +180,7 @@ class _SystemTapState extends State<SystemTap> {
                                   labelText: "Número de aspersores por lote",
                                   prefixIcon: Icon(Icons.numbers),
                                 ),
-                                dropdownColor: colors.background,
+                                dropdownColor: colors.surface,
                                 style: TextStyle(color: colors.tertiary),
                                 items: List.generate(10, (index) => index + 1)
                                     .map(

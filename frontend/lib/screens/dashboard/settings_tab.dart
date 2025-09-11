@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:plantiq/screens/auth/mail_reset.dart';
 import 'package:plantiq/widgets/theme_provider.dart';
+import 'package:plantiq/main.dart';
+
+// Ejemplo: Funciones para manejar token local (ajusta según tu implementación)
+Future<String?> getStoredToken() async {
+  // Implementa obtener token localmente (SharedPreferences, Provider, etc.)
+  // Ejemplo: final prefs = await SharedPreferences.getInstance(); return prefs.getString('token');
+  return 'tu_token_de_ejemplo'; // Remplaza con tu lógica real
+}
+
+Future<void> clearStoredToken() async {
+  // Implementa limpiar el token guardado localmente
+  // Ejemplo: final prefs = await SharedPreferences.getInstance(); await prefs.remove('token');
+}
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -13,12 +27,37 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> {
   bool modoClaro = false;
 
+  Future<void> logout() async {
+    final token = await getStoredToken();
+    if (token == null) return; // No hay token guardado
+
+    final response = await http.post(
+      Uri.parse('https://tu-api/logout/'), // Cambia por URL real de tu backend
+      headers: {'Authorization': 'Token $token'},
+    );
+
+    if (response.statusCode == 200) {
+      await clearStoredToken();
+      if (mounted) {
+        Navigator.of(
+          context,
+        ).pushReplacementNamed('/login'); // Ruta a pantalla login
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al cerrar sesión')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -30,81 +69,114 @@ class _SettingsTabState extends State<SettingsTab> {
             ),
           ),
           ListTile(
-            leading:  Icon(Icons.light_mode, color: colors.tertiary ),
-            title: Text('Modo claro', style: Theme.of(context).textTheme.bodyLarge,),
+            leading: Icon(Icons.light_mode, color: colors.tertiary),
+            title: Text(
+              'Modo claro',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             trailing: Switch(
               value: themeProvider.themeMode == ThemeMode.light,
-                onChanged: (value) {
-                  themeProvider.toggleTheme();
+              onChanged: (value) {
+                themeProvider.toggleTheme();
               },
             ),
           ),
           Divider(color: colors.tertiary),
           ListTile(
             leading: Icon(Icons.person, color: colors.tertiary),
-            title: Text('Datos del Usuario', style: Theme.of(context).textTheme.bodyLarge),
+            title: Text(
+              'Datos del Usuario',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const EditarDatosUsuario()),
+                MaterialPageRoute(
+                  builder: (context) => const EditarDatosUsuario(),
+                ),
               );
             },
           ),
           Divider(color: colors.tertiary),
           ListTile(
             leading: Icon(Icons.agriculture, color: colors.tertiary),
-            title:  Text('Datos de la Finca', style: Theme.of(context).textTheme.bodyLarge),
+            title: Text(
+              'Datos de la Finca',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const EditarDatosFinca()),
+                MaterialPageRoute(
+                  builder: (context) => const EditarDatosFinca(),
+                ),
               );
             },
           ),
           Divider(color: colors.tertiary),
           ListTile(
             leading: Icon(Icons.lock, color: colors.tertiary),
-            title: Text('Autenticación', style: Theme.of(context).textTheme.bodyLarge),
+            title: Text(
+              'Autenticación',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             onTap: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  backgroundColor: colors.background,
-                  title: Text('Opciones de Autenticación', style: TextStyle(color: colors.tertiary)),
+                  backgroundColor: colors.surface,
+                  title: Text(
+                    'Opciones de Autenticación',
+                    style: TextStyle(color: colors.tertiary),
+                  ),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ElevatedButton(
-                        style: 
-                        ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(colors.surface),
-                          fixedSize: MaterialStateProperty.all(Size(200, 30)),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(
+                            colors.surface,
+                          ),
+                          fixedSize: WidgetStateProperty.all(
+                            const Size(200, 30),
+                          ),
                         ),
                         onPressed: () {
-                          Navigator.push(context,
+                          Navigator.push(
+                            context,
                             MaterialPageRoute(
-                              builder: (context) => const MailResetScreen()
-                            )
+                              builder: (context) => const MailResetScreen(),
+                            ),
                           );
-                          // Navegación o formulario para cambiar contraseña
                         },
                         child: Text(
                           'Cambiar Contraseña',
-                          style: Theme.of(context).textTheme.bodyLarge
+                          style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
                       const SizedBox(height: 12),
                       ElevatedButton(
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(colors.surface),
-                          fixedSize: MaterialStateProperty.all(Size(200, 30)),
+                          backgroundColor: WidgetStateProperty.all(
+                            colors.surface,
+                          ),
+                          fixedSize: WidgetStateProperty.all(
+                            const Size(200, 30),
+                          ),
                         ),
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PaginaInicio(),
+                            ),
+                          );
                         },
                         child: const Text(
-                          'Cerrar Sesión', 
-                          style: TextStyle(color: Color.fromARGB(255, 191, 37, 37)),
+                          'Cerrar Sesión',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 191, 37, 37),
+                          ),
                         ),
                       ),
                     ],
@@ -112,7 +184,10 @@ class _SettingsTabState extends State<SettingsTab> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text('Cancelar', style: TextStyle(color: colors.primary)),
+                      child: Text(
+                        'Cancelar',
+                        style: TextStyle(color: colors.primary),
+                      ),
                     ),
                   ],
                 ),
@@ -135,24 +210,30 @@ class EditarDatosUsuario extends StatefulWidget {
 class _EditarDatosUsuarioState extends State<EditarDatosUsuario> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController nombresController =
-      TextEditingController(text: "Daniel Samir");
-  final TextEditingController apellidosController =
-      TextEditingController(text: "Gonzáles Pérez");
-  final TextEditingController telefonoController =
-      TextEditingController(text: "0180004455");
-  final TextEditingController correoController =
-      TextEditingController(text: "GonzalesPerezSamir@gmail.com");
-  final TextEditingController rolController =
-      TextEditingController(text: "Administrador");
-  final TextEditingController direccionController =
-      TextEditingController(text: "Calle 22 sur # 56-27 n");
+  final TextEditingController nombresController = TextEditingController(
+    text: "Daniel Samir",
+  );
+  final TextEditingController apellidosController = TextEditingController(
+    text: "Gonzáles Pérez",
+  );
+  final TextEditingController telefonoController = TextEditingController(
+    text: "0180004455",
+  );
+  final TextEditingController correoController = TextEditingController(
+    text: "GonzalesPerezSamir@gmail.com",
+  );
+  final TextEditingController rolController = TextEditingController(
+    text: "Administrador",
+  );
+  final TextEditingController direccionController = TextEditingController(
+    text: "Calle 22 sur # 56-27 n",
+  );
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: colors.surface,
         leading: IconButton(
@@ -173,35 +254,56 @@ class _EditarDatosUsuarioState extends State<EditarDatosUsuario> {
             children: [
               _buildTextField(nombresController, 'Nombres', icon: Icons.person),
               const SizedBox(height: 12),
-              _buildTextField(apellidosController, 'Apellidos', icon: Icons.person_outline),
+              _buildTextField(
+                apellidosController,
+                'Apellidos',
+                icon: Icons.person_outline,
+              ),
               const SizedBox(height: 12),
-              _buildTextField(telefonoController, 'Teléfono de contacto',
-                  icon: Icons.phone, keyboardType: TextInputType.phone),
+              _buildTextField(
+                telefonoController,
+                'Teléfono de contacto',
+                icon: Icons.phone,
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: 12),
-              _buildTextField(correoController, 'Correo Electrónico',
-                  icon: Icons.email,
-                  keyboardType: TextInputType.emailAddress,
-                  isEmail: true),
+              _buildTextField(
+                correoController,
+                'Correo Electrónico',
+                icon: Icons.email,
+                keyboardType: TextInputType.emailAddress,
+                isEmail: true,
+              ),
               const SizedBox(height: 12),
               _buildTextField(rolController, 'Rol', icon: Icons.badge),
               const SizedBox(height: 12),
-              _buildTextField(direccionController, 'Dirección', icon: Icons.home),
+              _buildTextField(
+                direccionController,
+                'Dirección',
+                icon: Icons.home,
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Datos guardados correctamente', 
-                        style: Theme.of(context).textTheme.bodyLarge,), 
-                    backgroundColor: colors.surface,),
+                      SnackBar(
+                        content: Text(
+                          'Datos guardados correctamente',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        backgroundColor: colors.surface,
+                      ),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
                 ),
-                child: Text('Guardar', style: Theme.of(context).textTheme.bodyMedium),
+                child: Text(
+                  'Guardar',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ],
           ),
@@ -219,35 +321,30 @@ class _EditarDatosUsuarioState extends State<EditarDatosUsuario> {
     bool isEmail = false,
   }) {
     final colors = Theme.of(context).colorScheme;
-    bool _isHovered = false;
+    bool isHovered = false;
 
     return StatefulBuilder(
       builder: (context, setState) {
         return MouseRegion(
-          onEnter: (_) => setState(() => _isHovered = true),
-          onExit: (_) => setState(() => _isHovered = false),
+          onEnter: (_) => setState(() => isHovered = true),
+          onExit: (_) => setState(() => isHovered = false),
           child: TextFormField(
             controller: controller,
             keyboardType: keyboardType,
             decoration: InputDecoration(
               hintText: hintText,
               filled: true,
-              fillColor: _isHovered
-                  ? colors.surface.withOpacity(0.9) // hover → un poco más claro
+              fillColor: isHovered
+                  ? colors.surface.withOpacity(0.9)
                   : colors.surface,
               prefixIcon: icon != null ? Icon(icon) : null,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: colors.tertiary, // normal
-                ),
+                borderSide: BorderSide(color: colors.tertiary),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: colors.tertiary,
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: colors.tertiary, width: 2),
               ),
             ),
             validator: (value) {
@@ -264,8 +361,7 @@ class _EditarDatosUsuarioState extends State<EditarDatosUsuario> {
       },
     );
   }
-
-  }
+}
 
 class EditarDatosFinca extends StatefulWidget {
   const EditarDatosFinca({super.key});
@@ -277,10 +373,12 @@ class EditarDatosFinca extends StatefulWidget {
 class _EditarDatosFincaState extends State<EditarDatosFinca> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController nombreFincaController =
-      TextEditingController(text: "Finca Napolitana");
-  final TextEditingController tipoCultivoController =
-      TextEditingController(text: "Granos, tubérculos y frutas");
+  final TextEditingController nombreFincaController = TextEditingController(
+    text: "Finca Napolitana",
+  );
+  final TextEditingController tipoCultivoController = TextEditingController(
+    text: "Granos, tubérculos y frutas",
+  );
   final TextEditingController tamanoAreaController = TextEditingController();
   final TextEditingController zonasController = TextEditingController();
 
@@ -288,7 +386,7 @@ class _EditarDatosFincaState extends State<EditarDatosFinca> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: colors.surface,
         leading: IconButton(
@@ -307,33 +405,52 @@ class _EditarDatosFincaState extends State<EditarDatosFinca> {
           key: _formKey,
           child: ListView(
             children: [
-              _buildTextField(nombreFincaController, 'Nombre de la finca o predio',
-                  icon: Icons.landscape),
+              _buildTextField(
+                nombreFincaController,
+                'Nombre de la finca o predio',
+                icon: Icons.landscape,
+              ),
               const SizedBox(height: 12),
-              _buildTextField(tipoCultivoController, 'Tipo de cultivo(s) registrados',
-                  icon: Icons.eco),
+              _buildTextField(
+                tipoCultivoController,
+                'Tipo de cultivo(s) registrados',
+                icon: Icons.eco,
+              ),
               const SizedBox(height: 12),
-              _buildTextField(tamanoAreaController,
-                  'Tamaño del área cubierta por aspersores (m² o ha)',
-                  icon: Icons.crop_square),
+              _buildTextField(
+                tamanoAreaController,
+                'Tamaño del área cubierta por aspersores (m² o ha)',
+                icon: Icons.crop_square,
+              ),
               const SizedBox(height: 12),
-              _buildTextField(zonasController, 'Zonas configuradas',
-                  icon: Icons.map, hintText: 'Ej. Lote 1, Lote 2...'),
+              _buildTextField(
+                zonasController,
+                'Zonas configuradas',
+                icon: Icons.map,
+                hintText: 'Ej. Lote 1, Lote 2...',
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Datos de la finca guardados',
-                      style: Theme.of(context).textTheme.bodyLarge),
-                      backgroundColor: colors.surface,),
+                      SnackBar(
+                        content: Text(
+                          'Datos de la finca guardados',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        backgroundColor: colors.surface,
+                      ),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
                 ),
-                child: Text('Guardar', style: Theme.of(context).textTheme.bodyMedium,),
+                child: Text(
+                  'Guardar',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ],
           ),
@@ -342,8 +459,12 @@ class _EditarDatosFincaState extends State<EditarDatosFinca> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {IconData? icon, String? hintText}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    IconData? icon,
+    String? hintText,
+  }) {
     final colors = Theme.of(context).colorScheme;
     return TextFormField(
       controller: controller,
@@ -351,22 +472,16 @@ class _EditarDatosFincaState extends State<EditarDatosFinca> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
-        
         filled: true,
         fillColor: colors.surface,
-        prefixIcon:
-            icon != null ? Icon(icon) : null,
+        prefixIcon: icon != null ? Icon(icon) : null,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(
-            color: colors.tertiary
-          ), // Sin borde visible
+          borderSide: BorderSide(color: colors.tertiary),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(
-            color: colors.tertiary
-          ), // Sin borde visible al enfocar
+          borderSide: BorderSide(color: colors.tertiary),
         ),
       ),
       validator: (value) {

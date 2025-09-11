@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:plantiq/models/cultivo.dart';
+import '../../models/cultivo.dart';
 import '../../models/riegos.dart';
 import '../../services/api_service.dart';
 
@@ -24,44 +24,47 @@ class _StatisticsTabState extends State<StatisticsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1F2A),
+      backgroundColor: colors.surface,
       body: FutureBuilder<List<Cultivo>>(
         future: futureCultivos,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(color: colors.tertiary),
+            );
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No hay lotes disponibles'));
           }
-
-          final lotes = snapshot.data!;
+          final cultivo = snapshot.data!;
           return Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
+                // Selección de lote y tipo de gráfica
                 Row(
                   children: [
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2B2F3A),
+                          color: colors.surface,
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<Cultivo>(
                             isExpanded: true,
-                            hint: const Text(
+                            hint: Text(
                               'Seleccione un cultivo',
-                              style: TextStyle(color: Color(0xFFE3E3E3)),
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
-                            dropdownColor: const Color(0xFF2B2F3A),
-                            style: const TextStyle(color: Color(0xFFE3E3E3)),
+                            dropdownColor: colors.surface,
+                            style: Theme.of(context).textTheme.bodyLarge,
                             value: selectedCultivo,
-                            items: lotes.map((c) {
+                            items: cultivo.map((c) {
                               return DropdownMenuItem<Cultivo>(
                                 value: c,
                                 child: Text(c.nombreCultivo),
@@ -81,15 +84,15 @@ class _StatisticsTabState extends State<StatisticsTab> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2B2F3A),
+                          color: colors.surface,
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: chartType,
                             isExpanded: true,
-                            dropdownColor: const Color(0xFF2B2F3A),
-                            style: const TextStyle(color: Color(0xFFE3E3E3)),
+                            dropdownColor: colors.surface,
+                            style: Theme.of(context).textTheme.bodyLarge,
                             items: const [
                               DropdownMenuItem(
                                 value: 'line',
@@ -116,12 +119,13 @@ class _StatisticsTabState extends State<StatisticsTab> {
                   ],
                 ),
                 const SizedBox(height: 12),
+                // Instrucción si no hay lote seleccionado
                 if (selectedCultivo == null)
-                  const Expanded(
+                  Expanded(
                     child: Center(
                       child: Text(
-                        'Selecciona un cultivo para ver sus gráficas',
-                        style: TextStyle(color: Color(0xFFE3E3E3)),
+                        'Selecciona un lote para ver sus gráficas',
+                        style: TextStyle(color: colors.tertiary),
                       ),
                     ),
                   )
@@ -138,7 +142,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFDA00FF),
+                      backgroundColor: colors.primary,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 30,
                         vertical: 20,
@@ -147,9 +151,9 @@ class _StatisticsTabState extends State<StatisticsTab> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Activar",
-                      style: TextStyle(color: Color(0xFFE3E3E3), fontSize: 16),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                 ),
@@ -161,10 +165,11 @@ class _StatisticsTabState extends State<StatisticsTab> {
     );
   }
 
+  // Ejemplo gráfica radial para un riego
   Widget buildRadialBarChart(Riego riego, {required bool isPh}) {
     final maxValue = isPh ? 14.0 : 100.0;
+    // Aquí debes reemplazar con los campos reales de Riego para ph y humedad
     final value = isPh ? riego.ph : riego.humedad;
-
     return SizedBox(
       width: 100,
       height: 250,
@@ -177,6 +182,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
               value: value,
               color: isPh ? Colors.greenAccent : Colors.blueAccent,
               radius: 55,
+              title: value.toStringAsFixed(1),
               titleStyle: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -204,8 +210,9 @@ class _StatisticsTabState extends State<StatisticsTab> {
         itemCount: riegosToShow.length,
         itemBuilder: (context, index) {
           final riego = riegosToShow[index];
+          final colors = Theme.of(context).colorScheme;
           return Card(
-            color: const Color(0xFF2B2F3A),
+            color: colors.surface,
             margin: const EdgeInsets.symmetric(vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -217,11 +224,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                 children: [
                   Text(
                     'Riego ${riego.nombre}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -230,9 +233,9 @@ class _StatisticsTabState extends State<StatisticsTab> {
                       Expanded(
                         child: Column(
                           children: [
-                            const Text(
+                            Text(
                               'Humedad',
-                              style: TextStyle(color: Colors.white),
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(height: 8),
                             buildRadialBarChart(riego, isPh: false),
@@ -242,9 +245,9 @@ class _StatisticsTabState extends State<StatisticsTab> {
                       Expanded(
                         child: Column(
                           children: [
-                            const Text(
-                              'pH',
-                              style: TextStyle(color: Colors.white),
+                            Text(
+                              'Temperatura',
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(height: 8),
                             buildRadialBarChart(riego, isPh: true),
@@ -261,13 +264,15 @@ class _StatisticsTabState extends State<StatisticsTab> {
       );
     }
 
+    // Para líneas o barras, ejemplo con gráficos de humedad y pH de cada riego
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: riegosToShow.length,
       itemBuilder: (context, index) {
         final riego = riegosToShow[index];
+        final colors = Theme.of(context).colorScheme;
         return Card(
-          color: const Color(0xFF2B2F3A),
+          color: colors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -278,14 +283,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Humedad',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+                Text('Humedad', style: Theme.of(context).textTheme.titleLarge),
                 SizedBox(
                   height: 250,
                   child: chartType == 'bar'
@@ -342,13 +340,9 @@ class _StatisticsTabState extends State<StatisticsTab> {
                         ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'pH',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                Text(
+                  'Temperatura',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 SizedBox(
                   height: 250,

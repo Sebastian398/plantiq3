@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../models/cultivo.dart';
 import '../../models/riegos.dart';
 import '../../services/api_service.dart';
+import '../../models/cultivo.dart';
 
 class RisksListScreen extends StatefulWidget {
   const RisksListScreen({super.key});
@@ -16,7 +16,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
   @override
   void initState() {
     super.initState();
-    futureCultivos = ApiService.getCultivos(); // Cambiado a Cultivos
+    futureCultivos = ApiService.getCultivos();
   }
 
   Future<void> _refreshData() async {
@@ -26,11 +26,112 @@ class _RisksListScreenState extends State<RisksListScreen> {
   }
 
   void _createRiego(Cultivo cultivo) {
-    print('Crear riego para cultivo: ${cultivo.nombreCultivo}');
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            "Nuevo riego en ${cultivo.nombreCultivo}",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: "Inicio de riego",
+                  prefixIcon: Icon(Icons.access_time),
+                ),
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: "Duración (minutos)",
+                  prefixIcon: Icon(Icons.timer),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Guardar"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  void _editRiego(Riego riego) {
-    print('Editar riego id: ${riego.id}');
+  void _editRiegoMenu(Riego riego) {
+    // Controladores para los campos, inicializados con los valores actuales
+    final TextEditingController inicioController = TextEditingController(
+      text: riego.fecha.toLocal().toString().split(" ")[0],
+    );
+    final TextEditingController duracionController = TextEditingController(
+      text: riego.cantidadAgua.toString(),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            "Editar riego: ${riego.nombre}",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: inicioController,
+                decoration: const InputDecoration(
+                  labelText: "Inicio de riego",
+                  prefixIcon: Icon(Icons.access_time),
+                ),
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: duracionController,
+                decoration: const InputDecoration(
+                  labelText: "Duración (minutos)",
+                  prefixIcon: Icon(Icons.timer),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Aquí luego metes tu lógica para actualizar el riego
+                print("Nuevo inicio: ${inicioController.text}");
+                print("Nueva duración: ${duracionController.text}");
+                Navigator.pop(context);
+              },
+              child: const Text("Guardar cambios"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _deleteRiego(Riego riego) async {
@@ -52,17 +153,18 @@ class _RisksListScreenState extends State<RisksListScreen> {
       ),
     );
 
-    if (confirm == true) {
-      print('Eliminar riego id: ${riego.id}');
-      await ApiService.eliminarProgramacionRiego(riego.id);
-      _refreshData();
-    }
+    //if (confirm == true) {
+    //  print('Eliminar riego id: ${riego.id}');
+    //  await ApiService.deleteRiego(riego.id);
+    //  _refreshData();
+    //}
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1F2A),
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Container(
           padding: const EdgeInsets.all(20),
@@ -70,13 +172,9 @@ class _RisksListScreenState extends State<RisksListScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                'Listado de Riegos por Cultivo',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFE3E3E3),
-                ),
+              Text(
+                'Listado de Riegos por cultivo',
+                style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -85,9 +183,9 @@ class _RisksListScreenState extends State<RisksListScreen> {
                   future: futureCultivos,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
+                      return Center(
                         child: CircularProgressIndicator(
-                          color: Color(0xFFDA00FF),
+                          color: colors.tertiary,
                         ),
                       );
                     } else if (snapshot.hasError) {
@@ -101,17 +199,17 @@ class _RisksListScreenState extends State<RisksListScreen> {
                         ),
                       );
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
                           'No hay cultivos disponibles',
-                          style: TextStyle(color: Colors.white70, fontSize: 18),
+                          style: TextStyle(color: colors.tertiary),
                         ),
                       );
                     }
                     final cultivos = snapshot.data!;
                     return RefreshIndicator(
                       onRefresh: _refreshData,
-                      color: const Color(0xFFDA00FF),
+                      color: colors.tertiary,
                       child: ListView.builder(
                         padding: const EdgeInsets.all(8),
                         itemCount: cultivos.length,
@@ -121,7 +219,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
                             margin: const EdgeInsets.symmetric(vertical: 8),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2B2F3A),
+                              color: colors.surface,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
@@ -133,21 +231,19 @@ class _RisksListScreenState extends State<RisksListScreen> {
                                   children: [
                                     Text(
                                       cultivo.nombreCultivo,
-                                      style: const TextStyle(
-                                        color: Color(0xFFE3E3E3),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleLarge,
                                     ),
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF1C1F2A),
+                                        color: colors.surface,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: IconButton(
-                                        icon: const Icon(
+                                        icon: Icon(
                                           Icons.add,
-                                          color: Colors.white,
+                                          color: colors.tertiary,
                                         ),
                                         tooltip: 'Nuevo riego',
                                         onPressed: () => _createRiego(cultivo),
@@ -158,19 +254,87 @@ class _RisksListScreenState extends State<RisksListScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                // Aquí se debe agregar la lista de riegos asociados al cultivo si existe
-                                // Pero en tu modelo Cultivo no hay relación directa con Riego,
-                                // entonces depende de que la API devuelva esa info o se adapte la estructura.
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 10),
-                                  child: Text(
-                                    'No hay riegos programados',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
+                                if (cultivo.programaciones.isNotEmpty)
+                                  ...cultivo.programaciones.map((riego) {
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: 10),
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: colors.surface,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        title: Text(
+                                          riego.nombre,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                        ),
+                                        subtitle: Text(
+                                          'Fecha: ${riego.fecha.toLocal().toString().split(" ")[0]} / Agua: ${riego.cantidadAgua} L',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge,
+                                        ),
+                                        trailing: Wrap(
+                                          spacing: 8,
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                color: colors.surface,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: IconButton(
+                                                icon: Icon(
+                                                  Icons.edit,
+                                                  color: colors.tertiary,
+                                                ),
+                                                tooltip: 'Editar',
+                                                onPressed: () =>
+                                                    _editRiegoMenu(riego),
+                                                splashRadius: 20,
+                                                padding: const EdgeInsets.all(
+                                                  8,
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.redAccent,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete,
+                                                  color: Colors.white,
+                                                ),
+                                                tooltip: 'Eliminar',
+                                                onPressed: () =>
+                                                    _deleteRiego(riego),
+                                                splashRadius: 20,
+                                                padding: const EdgeInsets.all(
+                                                  8,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  })
+                                else
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    child: Text(
+                                      'No hay riegos programados',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleLarge,
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           );
@@ -183,6 +347,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
             ],
           ),
         ),
-    ),);
-}
+      ),
+    );
+  }
 }

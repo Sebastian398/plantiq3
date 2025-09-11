@@ -57,15 +57,22 @@ class ApiService {
     );
   }
 
-  static Future<bool> changePassword(String oldPassword, String newPassword) async {
-    final url = Uri.parse('https://tu-api.com/api/password_reset/');
+  static Future<bool> changePassword(
+    String oldPassword,
+    String newPassword,
+    String token,
+  ) async {
+    final url = Uri.parse('http://localhost:8000/api/password_reset/');
     final response = await http.post(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer TU_TOKEN_AQUI', // Si usas token de autenticación
+        'Authorization': "Bearer $token", // Si usas token de autenticación
       },
-      body: jsonEncode({'old_password': oldPassword, 'new_password': newPassword}),
+      body: jsonEncode({
+        'old_password': oldPassword,
+        'new_password': newPassword,
+      }),
     );
 
     if (response.statusCode == 200) {
@@ -75,6 +82,4 @@ class ApiService {
       return false;
     }
   }
-
 }
-

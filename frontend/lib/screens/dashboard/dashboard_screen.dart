@@ -40,7 +40,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           SideMenu(onItemSelected: _onItemSelected),
           Expanded(
             child: Container(
-              color: colors.background,
+              color: colors.surface,
               child: _screens[_selectedIndex],
             ),
           ),

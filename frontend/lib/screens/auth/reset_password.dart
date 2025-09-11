@@ -36,7 +36,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Center(
           child: Padding(

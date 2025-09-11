@@ -6,11 +6,11 @@ class HoverMenuItem extends StatefulWidget {
   final VoidCallback onTap;
 
   const HoverMenuItem({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   _HoverMenuItemState createState() => _HoverMenuItemState();

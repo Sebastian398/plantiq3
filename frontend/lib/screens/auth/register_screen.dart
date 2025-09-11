@@ -10,7 +10,7 @@ import 'package:plantiq/widgets/theme_logo.dart';
 class SimpleHoverButton extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const SimpleHoverButton({required this.onTap, required this.child, Key? key}) : super(key: key);
+  const SimpleHoverButton({required this.onTap, required this.child, super.key});
 
   @override
   _SimpleHoverButtonState createState() => _SimpleHoverButtonState();
@@ -41,7 +41,7 @@ class _SimpleHoverButtonState extends State<SimpleHoverButton> {
 class SimpleHoverLink extends StatefulWidget {
   final VoidCallback onTap;
   final Widget child;
-  const SimpleHoverLink({required this.onTap, required this.child, Key? key}) : super(key: key);
+  const SimpleHoverLink({required this.onTap, required this.child, super.key});
 
   @override
   _SimpleHoverLinkState createState() => _SimpleHoverLinkState();
@@ -141,7 +141,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
