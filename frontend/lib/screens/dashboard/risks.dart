@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/riegos.dart';
+import 'package:plantiq/models/programacion_riego.dart';
 import '../../services/api_service.dart';
 import '../../models/cultivo.dart';
 
@@ -26,6 +26,107 @@ class _RisksListScreenState extends State<RisksListScreen> {
   }
 
   void _createRiego(Cultivo cultivo) {
+  final TextEditingController duracionController = TextEditingController();
+  TimeOfDay? selectedTime;
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Text(
+                  "Nuevo riego en ${cultivo.nombreCultivo}",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        TimeOfDay? time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (time != null) {
+                          setState(() {
+                            selectedTime = time;
+                          });
+                        }
+                      },
+                      child: Text(
+                          selectedTime == null
+                              ? "Selecciona hora de inicio"
+                              : "Hora inicio: ${selectedTime!.format(context)}",
+                          style: TextStyle(fontSize: 16)),
+                    ),
+                    const SizedBox(height: 15),
+                    TextFormField(
+                      controller: duracionController,
+                      decoration: const InputDecoration(
+                        labelText: "Duración (minutos)",
+                        prefixIcon: Icon(Icons.timer),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancelar"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (selectedTime == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Seleccione la hora de inicio')),
+                        );
+                        return;
+                      }
+
+                      final duracion = int.tryParse(duracionController.text) ?? 0;
+                      if (duracion <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Ingrese duración válida')),
+                        );
+                        return;
+                      }
+
+                      // Convertir TimeOfDay a formato 24 horas HH:mm:ss para backend
+                      final ahora = DateTime.now();
+                      final dt = DateTime(ahora.year, ahora.month, ahora.day,
+                          selectedTime!.hour, selectedTime!.minute);
+                      final horaFormateada = "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:00";
+
+                      bool success = await ApiService.createRiego(
+                        cultivo.id,
+                        horaFormateada, // enviar en formato HH:mm:ss
+                        duracion,
+                      );
+
+                      if (success) {
+                        Navigator.pop(context);
+                        _refreshData();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Error al guardar el riego')),
+                        );
+                      }
+                    },
+                    child: const Text("Guardar"),
+                  ),
+                ],
+              ));
+    },
+  );
+
     showDialog(
       context: context,
       builder: (context) {
@@ -72,13 +173,13 @@ class _RisksListScreenState extends State<RisksListScreen> {
     );
   }
 
-  void _editRiegoMenu(Riego riego) {
+  void _editRiegoMenu(ProgramacionRiego programacion) {
     // Controladores para los campos, inicializados con los valores actuales
     final TextEditingController inicioController = TextEditingController(
-      text: riego.fecha.toLocal().toString().split(" ")[0],
+      text: programacion.activo.toString().split(" ")[0],
     );
     final TextEditingController duracionController = TextEditingController(
-      text: riego.cantidadAgua.toString(),
+      text: programacion.duracion.toString(),
     );
 
     showDialog(
@@ -90,7 +191,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
-            "Editar riego: ${riego.nombre}",
+            "Editar riego: ${programacion.activo}",
             style: Theme.of(context).textTheme.titleLarge,
           ),
           content: Column(
@@ -134,12 +235,12 @@ class _RisksListScreenState extends State<RisksListScreen> {
     );
   }
 
-  void _deleteRiego(Riego riego) async {
+  void _deleteRiego(ProgramacionRiego programacion) async {
     bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar eliminación'),
-        content: Text('¿Eliminar riego "${riego.nombre}"?'),
+        content: Text('¿Eliminar riego "${programacion.activo}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -230,7 +331,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      cultivo.nombreCultivo,
+                                      cultivo.nombreCultivo ?? 'Sin nombre',
                                       style: Theme.of(
                                         context,
                                       ).textTheme.titleLarge,
@@ -255,7 +356,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
                                 ),
                                 const SizedBox(height: 12),
                                 if (cultivo.programaciones.isNotEmpty)
-                                  ...cultivo.programaciones.map((riego) {
+                                  ...cultivo.programaciones.map((ProgramacionRiego) {
                                     return Container(
                                       margin: const EdgeInsets.only(bottom: 10),
                                       padding: const EdgeInsets.all(12),
@@ -266,16 +367,12 @@ class _RisksListScreenState extends State<RisksListScreen> {
                                       child: ListTile(
                                         contentPadding: EdgeInsets.zero,
                                         title: Text(
-                                          riego.nombre,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
+                                          "Riego a las ${ProgramacionRiego.inicio ?? 'N/A'}",
+                                          style: Theme.of(context).textTheme.bodyMedium,
                                         ),
                                         subtitle: Text(
-                                          'Fecha: ${riego.fecha.toLocal().toString().split(" ")[0]} / Agua: ${riego.cantidadAgua} L',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyLarge,
+                                          'Duración: ${ProgramacionRiego.duracion?.toString() ?? 'N/A'} minutos',
+                                          style: Theme.of(context).textTheme.bodyLarge,
                                         ),
                                         trailing: Wrap(
                                           spacing: 8,
@@ -293,7 +390,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
                                                 ),
                                                 tooltip: 'Editar',
                                                 onPressed: () =>
-                                                    _editRiegoMenu(riego),
+                                                    _editRiegoMenu(ProgramacionRiego),
                                                 splashRadius: 20,
                                                 padding: const EdgeInsets.all(
                                                   8,
@@ -313,7 +410,7 @@ class _RisksListScreenState extends State<RisksListScreen> {
                                                 ),
                                                 tooltip: 'Eliminar',
                                                 onPressed: () =>
-                                                    _deleteRiego(riego),
+                                                    _deleteRiego(ProgramacionRiego),
                                                 splashRadius: 20,
                                                 padding: const EdgeInsets.all(
                                                   8,

@@ -1,7 +1,7 @@
 class ProgramacionRiego {
   final int id;
-  final String inicio;
-  final int duracion;
+  final String? inicio;
+  final int? duracion;
   final bool activo;
   final int? numeroLotes;
 

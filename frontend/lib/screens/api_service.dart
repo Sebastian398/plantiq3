@@ -82,4 +82,27 @@ class ApiService {
       return false;
     }
   }
+
+  static Future<bool> createRiego(
+    String token,
+    int cultivoId,
+    String inicio,
+    int duracion,
+  ) async {
+    final response = await http.post(
+      Uri.parse(riegosEndpoint), // define esta constante en constants.dart
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "cultivo_id": cultivoId,
+        "fecha_inicio": inicio,
+        "duracion_minutos": duracion,
+      }),
+    );
+
+    // Retornamos true si el statusCode indica éxito (201 Created)
+    return response.statusCode == 201;
+  }
 }

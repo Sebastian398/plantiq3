@@ -45,6 +45,17 @@ class ApiService {
     }
   }
 
+   static Future<List<Cultivo1>> getCultivos1() async {
+    final response = await http.get(Uri.parse('$baseUrl/api/cultivos/'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => Cultivo1.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al cargar cultivos');
+    }
+  }
+
   /// 🔹 Crear un cultivo nuevo
   static Future<Cultivo> crearCultivo({
     required String nombre,
@@ -53,7 +64,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/api/cultivos/'),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"nombre_cultivo": nombre, "tipo_cultivo": tipo}),
+      body: jsonEncode({"nombre_cultivo": nombre, "tipo_cultivo": tipo,}),
     );
 
     if (response.statusCode == 201) {
@@ -83,5 +94,26 @@ class ApiService {
     if (response.statusCode != 204) {
       throw Exception('Error al eliminar riego');
     }
+  }
+
+  static Future<bool> createRiego(
+    int cultivo,
+    String inicio,
+    int duracion,
+  ) async {
+    final response = await http.post(
+      Uri.parse(riegosEndpoint),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "cultivo": cultivo,
+        "inicio": inicio,
+        "duracion": duracion,
+        "activo": true,
+      }),
+    );
+
+    return response.statusCode == 201;
   }
 }

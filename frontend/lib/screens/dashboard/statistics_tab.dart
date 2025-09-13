@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../models/cultivo.dart';
+import '../../models/cultivo.dart'; // Asegúrate de importar Cultivo1
 import '../../models/riegos.dart';
 import '../../services/api_service.dart';
 
@@ -12,14 +12,14 @@ class StatisticsTab extends StatefulWidget {
 }
 
 class _StatisticsTabState extends State<StatisticsTab> {
-  late Future<List<Cultivo>> futureCultivos;
-  Cultivo? selectedCultivo;
+  late Future<List<Cultivo1>> futureCultivos;
+  Cultivo1? selectedCultivo;
   String chartType = 'line';
 
   @override
   void initState() {
     super.initState();
-    futureCultivos = ApiService.getCultivos();
+    futureCultivos = ApiService.getCultivos1();
   }
 
   @override
@@ -27,7 +27,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colors.surface,
-      body: FutureBuilder<List<Cultivo>>(
+      body: FutureBuilder<List<Cultivo1>>(
         future: futureCultivos,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -39,7 +39,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No hay lotes disponibles'));
           }
-          final cultivo = snapshot.data!;
+          final cultivos = snapshot.data!;
           return Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -55,7 +55,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Cultivo>(
+                          child: DropdownButton<Cultivo1>(
                             isExpanded: true,
                             hint: Text(
                               'Seleccione un cultivo',
@@ -64,8 +64,8 @@ class _StatisticsTabState extends State<StatisticsTab> {
                             dropdownColor: colors.surface,
                             style: Theme.of(context).textTheme.bodyLarge,
                             value: selectedCultivo,
-                            items: cultivo.map((c) {
-                              return DropdownMenuItem<Cultivo>(
+                            items: cultivos.map((c) {
+                              return DropdownMenuItem<Cultivo1>(
                                 value: c,
                                 child: Text(c.nombreCultivo),
                               );
@@ -168,8 +168,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
   // Ejemplo gráfica radial para un riego
   Widget buildRadialBarChart(Riego riego, {required bool isPh}) {
     final maxValue = isPh ? 14.0 : 100.0;
-    // Aquí debes reemplazar con los campos reales de Riego para ph y humedad
-    final value = isPh ? riego.ph : riego.humedad;
+    final value = isPh ? (riego.ph ?? 0) : (riego.humedad ?? 0);
     return SizedBox(
       width: 100,
       height: 250,
@@ -179,7 +178,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
           sectionsSpace: 3,
           sections: [
             PieChartSectionData(
-              value: value,
+              value: value.toDouble(),
               color: isPh ? Colors.greenAccent : Colors.blueAccent,
               radius: 55,
               title: value.toStringAsFixed(1),
@@ -190,7 +189,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
               ),
             ),
             PieChartSectionData(
-              value: maxValue - value,
+              value: maxValue - value.toDouble(),
               color: Colors.grey.shade800,
               radius: 55,
               title: '',
@@ -201,7 +200,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
     );
   }
 
-  Widget _buildCharts(Cultivo cultivo) {
+  Widget _buildCharts(Cultivo1 cultivo) {
     final riegosToShow = cultivo.programaciones;
 
     if (chartType == 'radialBar') {
@@ -223,7 +222,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
               child: Column(
                 children: [
                   Text(
-                    'Riego ${riego.nombre}',
+                    'Riego ${riego.nombre ?? 'Sin nombre'}',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -264,7 +263,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
       );
     }
 
-    // Para líneas o barras, ejemplo con gráficos de humedad y pH de cada riego
+    // Para líneas o barras
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: riegosToShow.length,
@@ -294,7 +293,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                                 x: 0,
                                 barRods: [
                                   BarChartRodData(
-                                    toY: riego.humedad.toDouble(),
+                                    toY: riego.humedad?.toDouble() ?? 0,
                                     width: 16,
                                     color: Colors.blueAccent,
                                   ),
@@ -316,7 +315,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                           LineChartData(
                             lineBarsData: [
                               LineChartBarData(
-                                spots: [FlSpot(0, riego.humedad.toDouble())],
+                                spots: [FlSpot(0, riego.humedad?.toDouble() ?? 0)],
                                 isCurved: true,
                                 color: Colors.blueAccent,
                                 barWidth: 3,
@@ -340,10 +339,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                         ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  'Temperatura',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text('Temperatura', style: Theme.of(context).textTheme.titleLarge),
                 SizedBox(
                   height: 250,
                   child: chartType == 'bar'
@@ -354,7 +350,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                                 x: 0,
                                 barRods: [
                                   BarChartRodData(
-                                    toY: riego.ph.toDouble(),
+                                    toY: riego.ph?.toDouble() ?? 0,
                                     width: 16,
                                     color: Colors.greenAccent,
                                   ),
@@ -376,7 +372,7 @@ class _StatisticsTabState extends State<StatisticsTab> {
                           LineChartData(
                             lineBarsData: [
                               LineChartBarData(
-                                spots: [FlSpot(0, riego.ph.toDouble())],
+                                spots: [FlSpot(0, riego.ph?.toDouble() ?? 0)],
                                 isCurved: true,
                                 color: Colors.greenAccent,
                                 barWidth: 3,
