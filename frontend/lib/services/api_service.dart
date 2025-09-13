@@ -88,13 +88,12 @@ class ApiService {
   }
 
   /// 🔹 Eliminar riego
-  static Future<void> eliminarProgramacionRiego(int id) async {
+  static Future<bool> eliminarRiego(int id) async {
     final response = await http.delete(
-      Uri.parse('$baseUrl/programacion_riego_admin/$id/'),
+      Uri.parse('$baseUrl/api/programacion_riego_admin/$id/'),
+      headers: {'Content-Type': 'application/json'},
     );
-    if (response.statusCode != 204) {
-      throw Exception('Error al eliminar riego');
-    }
+    return response.statusCode == 204;
   }
 
   static Future<bool> createRiego(
