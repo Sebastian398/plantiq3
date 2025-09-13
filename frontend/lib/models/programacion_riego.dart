@@ -3,14 +3,14 @@ class ProgramacionRiego {
   final String? inicio;
   final int? duracion;
   final bool activo;
-  final int? numeroLotes;
+  final int? numero_lotes;
 
   ProgramacionRiego({
     required this.id,
     required this.inicio,
     required this.duracion,
     required this.activo,
-    this.numeroLotes,
+    this.numero_lotes,
   });
 
   factory ProgramacionRiego.fromJson(Map<String, dynamic> json) {
@@ -19,7 +19,7 @@ class ProgramacionRiego {
       inicio: json['inicio'],
       duracion: json['duracion'],
       activo: json['activo'],
-      numeroLotes: json['numero_lotes'] ?? 0,
+      numero_lotes: json['numero_lotes'] ?? 0,
     );
   }
 
@@ -29,7 +29,7 @@ class ProgramacionRiego {
       'inicio': inicio,
       'duracion': duracion,
       'activo': activo,
-      'numero_lotes': numeroLotes,
+      'numero_lotes': numero_lotes,
     };
   }
 }

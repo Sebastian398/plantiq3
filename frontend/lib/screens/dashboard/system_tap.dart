@@ -14,7 +14,7 @@ class _SystemTapState extends State<SystemTap> {
   final TextEditingController inicioRiegoController = TextEditingController();
   final TextEditingController duracionRiegoController = TextEditingController();
 
-  int? numeroLotes;
+  int? numero_lotes;
   int? numeroAspersoresPorLote;
 
   @override
@@ -44,13 +44,13 @@ class _SystemTapState extends State<SystemTap> {
 
     try {
       // 👇 Llamamos al service
-      final cultivo = await ApiService.crearCultivo(nombre: nombre, tipo: tipo);
+      final cultivo = await ApiService.crearCultivo(nombre: nombre, tipo: tipo, numero_lotes: numero_lotes);
 
       // Solo guardamos nombre/tipo en DRF (porque tu modelo Cultivo no tiene lotes/aspersores aún)
       print(
-        '✅ Cultivo creado en backend: ${cultivo.nombreCultivo} (${cultivo.tipoCultivo})',
+        '✅ Cultivo creado en backend: ${cultivo.nombreCultivo} (${cultivo.tipoCultivo} ${cultivo.numero_lotes})',
       );
-      print('Número de lotes: $numeroLotes');
+      print('Número de lotes: $numero_lotes');
       print('Número de aspersores por lote: $numeroAspersoresPorLote');
       print('Inicio de riego: $inicioRiego');
       print('Duración de riego: $duracionRiego');
@@ -69,7 +69,7 @@ class _SystemTapState extends State<SystemTap> {
       inicioRiegoController.clear();
       duracionRiegoController.clear();
       setState(() {
-        numeroLotes = null;
+        numero_lotes = null;
         numeroAspersoresPorLote = null;
       });
     } catch (e) {
@@ -170,7 +170,7 @@ class _SystemTapState extends State<SystemTap> {
                                     .toList(),
                                 onChanged: (value) {
                                   setState(() {
-                                    numeroLotes = value;
+                                    numero_lotes = value;
                                   });
                                 },
                               ),

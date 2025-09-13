@@ -60,11 +60,12 @@ class ApiService {
   static Future<Cultivo> crearCultivo({
     required String nombre,
     required String tipo,
+    required int? numero_lotes,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/cultivos/'),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"nombre_cultivo": nombre, "tipo_cultivo": tipo,}),
+      body: jsonEncode({"nombre_cultivo": nombre, "tipo_cultivo": tipo, "numero_lotes": numero_lotes}),
     );
 
     if (response.statusCode == 201) {

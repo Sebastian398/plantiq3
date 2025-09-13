@@ -35,7 +35,7 @@ class ApiService {
     String token,
     String nombreCultivo,
     String tipoCultivo,
-    int numeroLotes,
+    int numero_lotes,
     int aspersoresPorLote,
     String inicioRiego, // formato "HH:mm"
     int duracionRiego,
@@ -49,7 +49,7 @@ class ApiService {
       body: jsonEncode({
         "nombre_cultivo": nombreCultivo,
         "tipo_cultivo": tipoCultivo,
-        "numero_lotes": numeroLotes,
+        "numero_lotes": numero_lotes,
         "aspersores_por_lote": aspersoresPorLote,
         "inicio_riego": inicioRiego,
         "duracion_riego": duracionRiego,

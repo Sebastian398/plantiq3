@@ -34,6 +34,7 @@ class Cultivo {
   final int id;
   final String? nombreCultivo;
   final String? tipoCultivo;
+  final int? numero_lotes;
   final List<ProgramacionRiego> programaciones;
 
   // El token debe manejarse externamente, no como propiedad de instancia
@@ -43,6 +44,7 @@ class Cultivo {
     required this.id,
     required this.nombreCultivo,
     required this.tipoCultivo,
+    this.numero_lotes,
     List<ProgramacionRiego>? programaciones,
   }) : programaciones = programaciones ?? [];
 
@@ -51,6 +53,7 @@ class Cultivo {
       id: json['id'] as int,
       nombreCultivo: json['nombre_cultivo'] as String? ?? '',
       tipoCultivo: json['tipo_cultivo'] as String? ?? '',
+      numero_lotes: json['numero_lotes'] as int?,
       programaciones: (json['programaciones'] as List<dynamic>?)
               ?.map((r) => ProgramacionRiego.fromJson(r as Map<String, dynamic>))
               .toList() ??
