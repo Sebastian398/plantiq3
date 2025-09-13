@@ -61,11 +61,13 @@ class ApiService {
     required String nombre,
     required String tipo,
     required int? numero_lotes,
+    required int? numero_aspersores,
+
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/cultivos/'),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"nombre_cultivo": nombre, "tipo_cultivo": tipo, "numero_lotes": numero_lotes}),
+      body: jsonEncode({"nombre_cultivo": nombre, "tipo_cultivo": tipo, "numero_lotes": numero_lotes, "numero_aspersores": numero_aspersores }),
     );
 
     if (response.statusCode == 201) {

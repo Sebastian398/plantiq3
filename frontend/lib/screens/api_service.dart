@@ -36,7 +36,7 @@ class ApiService {
     String nombreCultivo,
     String tipoCultivo,
     int numero_lotes,
-    int aspersoresPorLote,
+    int numero_aspersores,
     String inicioRiego, // formato "HH:mm"
     int duracionRiego,
   ) {
@@ -50,7 +50,7 @@ class ApiService {
         "nombre_cultivo": nombreCultivo,
         "tipo_cultivo": tipoCultivo,
         "numero_lotes": numero_lotes,
-        "aspersores_por_lote": aspersoresPorLote,
+        "nuermo_aspersores": numero_aspersores,
         "inicio_riego": inicioRiego,
         "duracion_riego": duracionRiego,
       }),

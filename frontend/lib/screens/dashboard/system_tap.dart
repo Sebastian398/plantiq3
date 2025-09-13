@@ -15,7 +15,7 @@ class _SystemTapState extends State<SystemTap> {
   final TextEditingController duracionRiegoController = TextEditingController();
 
   int? numero_lotes;
-  int? numeroAspersoresPorLote;
+  int? numero_aspersores;
 
   @override
   void dispose() {
@@ -44,14 +44,14 @@ class _SystemTapState extends State<SystemTap> {
 
     try {
       // 👇 Llamamos al service
-      final cultivo = await ApiService.crearCultivo(nombre: nombre, tipo: tipo, numero_lotes: numero_lotes);
+      final cultivo = await ApiService.crearCultivo(nombre: nombre, tipo: tipo, numero_lotes: numero_lotes, numero_aspersores: numero_aspersores);
 
       // Solo guardamos nombre/tipo en DRF (porque tu modelo Cultivo no tiene lotes/aspersores aún)
       print(
-        '✅ Cultivo creado en backend: ${cultivo.nombreCultivo} (${cultivo.tipoCultivo} ${cultivo.numero_lotes})',
+        '✅ Cultivo creado en backend: ${cultivo.nombreCultivo} (${cultivo.tipoCultivo} ${cultivo.numero_lotes} ${cultivo.numero_aspersores})',
       );
       print('Número de lotes: $numero_lotes');
-      print('Número de aspersores por lote: $numeroAspersoresPorLote');
+      print('Número de aspersores por lote: $numero_aspersores');
       print('Inicio de riego: $inicioRiego');
       print('Duración de riego: $duracionRiego');
 
@@ -70,7 +70,7 @@ class _SystemTapState extends State<SystemTap> {
       duracionRiegoController.clear();
       setState(() {
         numero_lotes = null;
-        numeroAspersoresPorLote = null;
+        numero_aspersores = null;
       });
     } catch (e) {
       ScaffoldMessenger.of(
@@ -192,7 +192,7 @@ class _SystemTapState extends State<SystemTap> {
                                     .toList(),
                                 onChanged: (value) {
                                   setState(() {
-                                    numeroAspersoresPorLote = value;
+                                    numero_aspersores = value;
                                   });
                                 },
                               ),
